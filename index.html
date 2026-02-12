@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Наша История</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            text-align: center;
+            overflow-x: hidden;
+            
+            background: linear-gradient(-45deg, #ff4d6d, #ee7752, #e73c7e, #ff9a8b);
+            background-size: 400% 400%;
+            animation: gradientShift 5s ease infinite;
+            min-height: 100vh;
+}
+
+
+/* Сама магия движения фона */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+        header { background: #ff4d6d; color: white; padding: 100px 20px; }
+        .timeline { max-width: 600px; margin: 50px auto; border-left: 2px solid #ff4d6d; padding-left: 20px; text-align: left; }
+        /* Стеклянный блок для событий */
+.event {
+    margin-bottom: 40px;
+    position: relative;
+    /* Эффект стекла */
+    background: rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    
+    padding: 25px;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px 0 rgba(255, 77, 109, 0.1);
+    text-align: center;
+}
+
+/* Красное сердечко на линии (оставляем как было на скрине, но чуть правим фон) */
+.event::before { 
+    content: '❤️'; 
+    position: absolute; 
+    left: -31px; 
+    background: rgba(255, 245, 245, 0.5); /* Полупрозрачный фон под сердечком */
+    padding: 2px; 
+    border-radius: 50%;
+}
+
+/* Стеклянный заголовок главы */
+.chapter-title {
+    color: #ff4d6d;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(8px);
+    padding: 10px 20px;
+    display: inline-block;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 40px 0 20px -10px; /* Твой оригинальный сдвиг со скрина */
+    border: 2px solid #ff4d6d;
+    border-radius: 50px;
+}
+.photo-row {
+    display: flex;          /* Выстраивает элементы в ряд */
+    justify-content: center; /* Центрирует фото по горизонтали */
+    gap: 10px;              /* Расстояние между фотографиями */
+    flex-wrap: wrap;        /* Если фото не влезут в ряд, они перейдут на следующий */
+    margin: 20px 0;
+}
+
+.small-photo {
+    width: 150px;           /* Установите нужную ширину (например, 150px) */
+    height: 150px;          /* Одинаковая высота сделает их симметричными */
+    object-fit: cover;      /* Обрезает фото, чтобы оно не искажалось в квадрате */
+    border-radius: 10px;    /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.love-photo {
+    width: 250px !important;  /* Смени на 150px или 200px, если 250 много */
+    height: auto !important;
+    display: block !important;
+    margin: 15px auto !important;
+    border-radius: 15px;
+}
+.stats-card {
+    background: #fff;
+    border: 2px dashed #ff4d6d;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 400px;
+    font-family: 'Courier New', Courier, monospace; /* Шрифт как в терминале */
+    text-align: left;
+    box-shadow: 5px 5px 0px #ffccd5;
+}
+
+.stats-header {
+    color: #ff4d6d;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif;
+}
+
+.stat-line {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted #eee;
+    padding: 5px 0;
+}
+
+.stat-count {
+    color: #ff4d6d;
+    font-weight: bold;
+}
+.chapter-title {
+    display: block;       /* Чтобы заголовок занимал всю ширину */
+    text-align: center;   /* Центрирует текст внутри */
+    margin-left: auto;    /* Убираем отрицательный отступ, если он был */
+    margin-right: auto;
+    width: fit-content;   /* Чтобы рамка была по размеру текста */
+}
+/* Контейнер для дождя */
+.heart-rain {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    pointer-events: none; /* Это критично, чтобы кнопки под сердцами нажимались */
+    z-index: 10000 !important; /* Больше любого другого элемента на сайте */
+    overflow: hidden;
+    background: none !important; /* Никакого фона, который мог бы что-то закрыть */
+}
+
+.heart-drop {
+    position: fixed; /* Относительно окна браузера, а не блоков */
+    top: -50px;
+    color: #ff4d6d;
+    font-size: 20px;
+    user-select: none;
+    pointer-events: none;
+    z-index: 10000; /* Максимально наверх */
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh); /* Падают до самого низа экрана */
+    }
+}
+/* Контейнер для сердца */
+.love-meter-container {
+    text-align: center;
+    margin: 40px auto;
+}
+
+/* Сама фигура сердца через SVG маску или clip-path */
+.heart-shape {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    background-color: #e0e0e0;
+    margin: 20px auto;
+    clip-path: path('M75 145s-70-45-70-95c0-30 25-50 45-50 15 0 25 10 25 10s10-10 25-10c20 0 45 20 45 50 0 50-70 95-70 95z');
+}
+
+/* Заполнение внутри сердца */
+.heart-fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%; /* Начальная высота */
+    transition: height 1s ease-out, background-color 0.5s;
+}
+
+#love-percent {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+}
+
+.btn-love {
+    padding: 12px 25px;
+    background: #ff4d6d;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+.btn-love:active {
+    transform: scale(0.95);
+}
+.music-player {
+    background: #fff;
+    border-radius: 50px;
+    padding: 10px 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(255, 77, 109, 0.2);
+    margin: 20px auto;
+    border: 1px solid #ffccd5;
+}
+
+.play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ff4d6d;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.track-info {
+    text-align: left;
+}
+
+.track-name {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    display: block;
+}
+
+.artist-name {
+    font-size: 12px;
+    color: #888;
+}
+
+/* Анимация пульсации, когда играет музыка */
+.playing {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 77, 109, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 77, 109, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 77, 109, 0); }
+}
+.happiness-container {
+    text-align: center;
+    margin: 40px auto;
+}
+
+.btn-happiness {
+    background: linear-gradient(45deg, #ff4d6d, #ff8a9e);
+    color: white;
+    border: none;
+    padding: 20px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(255, 77, 109, 0.3);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.btn-happiness:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 30px rgba(255, 77, 109, 0.5);
+}
+
+.btn-happiness:active {
+    transform: scale(0.9);
+}
+
+#happiness-msg {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #ff4d6d;
+    min-height: 24px;
+    font-weight: 500;
+}
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Авто-подбор колонок */
+    gap: 10px; /* Расстояние между фото */
+    padding: 15px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.gallery-item {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Делает все фото квадратными */
+    object-fit: cover; /* Обрезает фото, чтобы оно заполнило квадрат, не растягиваясь */
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05); /* Увеличивается при наведении */
+    z-index: 2;
+}
+/* Анимация для заголовка */
+.fade-in-text {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1.5s ease-out forwards;
+}
+
+/* Анимация для подзаголовка с задержкой */
+.fade-in-delay {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1.5s ease-out 0.8s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.header-video {
+    width: 150px; /* Размер видео, можно менять */
+    height: auto;
+    display: block;
+    margin: 0 auto 20px auto; /* Центрируем и добавляем отступ до текста */
+    border-radius: 20px; /* Скругляем углы, если нужно */
+    position: relative;
+    z-index: 2;
+}
+header h1 {
+    font-size: clamp(32px, 10vw, 60px); /* Текст будет уменьшаться под экран телефона автоматически */
+    word-wrap: break-word;
+    padding: 0 10px;
+}
+
+header p {
+    font-size: clamp(16px, 5vw, 24px);
+    padding: 0 20px;
+}
+    </style>
+</head>
+<body>
+<header style="position: relative; overflow: hidden;">
+    <div class="cloud-container">  </div>
+
+    <video class="header-video" autoplay loop muted playsinline webkit-playsinline>
+    <source src="sticker.webm" type="video/webm">
+    <source src="sticker.mp4" type="video/mp4"> </video>
+    <h1 class="fade-in-text" style="position: relative; z-index: 2; font-size: 50px;">
+    Илюха и Дашуха
+</h1>
+    <p class="fade-in-delay" style="position: relative; z-index: 2; font-size: 22px;">
+    Мы общаемся уже 116 дней епт, и это только начало...0_0
+</p>
+</header>
+
+<div class="event">
+    <div class="chapter-title">Ну, ты сама знаешь...</div>
+    <div class="music-player" id="player-container">
+        <button class="play-btn" id="playButton" onclick="toggleMusic()">▶</button>
+        
+        <div class="track-info">
+            <span class="track-name">Очень странная Даша</span>
+            <span class="artist-name">Ariana Grande</span>
+        </div>
+
+        <audio id="myAudio" src="music.mp3"></audio>
+    </div>
+    <p style="font-size: 12px; color: #000; margin-top: 10px;">Нажми, чтобы включить атмосферу</p>
+</div>
+<div class="timeline">
+    <div class="chapter-title">Знакомство</div>
+    <div class="event">
+        <h3>22 октября 2025</h3>
+        <p>Наше первое знакомство</p>
+        <img src="first.png" class="love-photo" width="500">
+    </div>
+    <div class="event">
+        <h3>23 октября 2025</h3>
+        <p>Ой...</p>
+        <img src="begemot.png" class="love-photo" width="500">
+    </div>
+    <div class="event">
+        <h3>24 октября 2025</h3>
+        <p>Создание нашего стикерпака</p>
+        <img src="stiker.png" class="love-photo" width="500">
+    </div>
+    <div class="event">
+        <h3>26 октября 2025</h3>
+        <p>Наш первый фильм.</p>
+        <img src="film.jpg" class="love-photo" width="500">
+    </div>
+    <div class="chapter-title">Твоя киска</div>
+    <div class="event">
+    
+    <div class="photo-row">
+        <img src="cat1.jpg" class="small-photo">
+        <img src="cat2.jpg" class="small-photo">
+        <img src="cat3.jpg" class="small-photo">
+        </div>
+        <div class="chapter-title">Моя киска</div>
+        <div class="event">
+    <img src="dasha.jpg" class="love-photo">
+    
+    <p>😍💦</p>
+</div>
+<div class="event" style="text-align: center;"> <div class="chapter-title" style="display: inline-block; margin: 0 auto 20px auto;">
+        Цифры нашей любви
+    </div>
+
+    <div class="stats-card">
+        <div class="stats-header">🏆 САМЫЕ ЧАСТЫЕ СЛОВА</div>
+        
+        <div class="stat-line"><span>Мне</span> <span class="stat-count">2240 раз</span></div>
+        <div class="stat-line"><span>Боже</span> <span class="stat-count">1610 раз</span></div>
+        <div class="stat-line"><span>Нет</span> <span class="stat-count">1414 раз</span></div>
+        <div class="stat-line"><span>Уже</span> <span class="stat-count">1166 раз</span></div>
+        <div class="stat-line"><span>Она</span> <span class="stat-count">1034 раз</span></div>
+        <div class="stat-line"><span>Просто</span> <span class="stat-count">950 раз</span></div>
+        <div class="stat-line"><span>Там</span> <span class="stat-count">950 раз</span></div>
+        <div class="stat-line"><span>Если</span> <span class="stat-count">940 раз</span></div>
+        <div class="stat-line"><span>Щас</span> <span class="stat-count">918 раз</span></div>
+        <div class="stat-line"><span>Пиздец</span> <span class="stat-count">868 раз</span></div>
+        <div class="stat-line"><span>Всё</span> <span class="stat-count">740 раз</span></div>
+        <div class="stat-line"><span>Даша</span> <span class="stat-count">724 раз</span></div>
+        <div class="stat-line"><span>Надо</span> <span class="stat-count">712 раз</span></div>
+        <div class="stat-line"><span>Только</span> <span class="stat-count">704 раз</span></div>
+        <div class="stat-line"><span>Буду</span> <span class="stat-count">648 раз</span></div>
+        
+        <div class="total-messages" style="text-align: center; margin-top: 15px; padding: 10px; border-top: 1px solid #ffccd5;">
+    <span style="font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Всего отправлено</span>
+    <div style="font-size: 32px; font-weight: bold; color: #ff4d6d; margin: 5px 0;">41 000</div>
+    <span style="font-size: 14px; color: #888;">сообщений</span>
+</div>
+<div class="event">
+    <div class="chapter-title">Тест любви</div>
+    <div class="love-meter-container">
+        <div class="heart-shape">
+            <div id="fill" class="heart-fill"></div>
+        </div>
+        <span id="love-percent">? %</span>
+        <br>
+        <button class="btn-love" onclick="calculateLove()">Узнать результат</button>
+    </div>
+</div>
+
+<div class="event">
+    <div class="chapter-title">Кнопка счастья</div>
+    <div class="happiness-container">
+        <button class="btn-happiness" onclick="spreadHappiness(event)">Нажми меня! ✨</button>
+        <div id="happiness-msg"></div>
+    </div>
+</div>
+
+
+<div class="event">
+    <div class="chapter-title">Немного фоток</div>
+    <div class="photo-gallery">
+        <img src="1.jpg" class="gallery-item">
+        <img src="2.jpg" class="gallery-item">
+        <img src="3.jpg" class="gallery-item">
+        <img src="4.jpg" class="gallery-item">
+        <img src="5.jpg" class="gallery-item">
+        <img src="6.jpg" class="gallery-item">
+        <img src="7.jpg" class="gallery-item">
+        <img src="8.jpg" class="gallery-item">
+        <img src="9.jpg" class="gallery-item">
+        <img src="10.jpg" class="gallery-item">
+        <img src="11.jpg" class="gallery-item">
+        <img src="12.jpg" class="gallery-item">
+        <img src="13.jpg" class="gallery-item">
+        <img src="14.jpg" class="gallery-item">
+        <img src="15.jpg" class="gallery-item">
+        <img src="16.jpg" class="gallery-item">
+    </div>
+</div>
+<footer style="padding: 50px 20px; color: #ff4d6d; font-size: 14px; font-style: italic;">
+   Ты мое самое яркое воспоминание❤❤ ❤️
+</footer>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<p>❤️ Люблю тебя больше, чем вчера, но меньше, чем завтра.</p>
+
+
+
+
+<div id="heartContainer"></div>
+</body>
+
+<script>
+
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart-drop';
+    heart.innerHTML = '❤️';
+    
+    // Используем 100vw, чтобы сердца рождались по всей ширине экрана
+    heart.style.left = Math.random() * 100 + "vw";
+    
+    // Случайная скорость падения
+    const duration = Math.random() * 3 + 3; // от 3 до 6 секунд
+    heart.style.animationDuration = duration + "s";
+    
+    // Случайный размер
+    heart.style.fontSize = Math.random() * 15 + 10 + "px";
+
+    document.body.appendChild(heart); // Добавляем прямо в body, чтобы не было границ
+
+    setTimeout(() => {
+        heart.remove();
+    }, duration * 1000);
+}
+
+// Запускаем
+setInterval(createHeart, 300);
+
+function calculateLove() {
+    const fill = document.getElementById('fill');
+    const percentText = document.getElementById('love-percent');
+    
+    
+    const randomPercent = Math.floor(Math.random() * 101);
+    
+   
+    fill.style.height = randomPercent + '%';
+    percentText.innerText = randomPercent + '%';
+    
+    // Логика цвета
+    if (randomPercent < 20) {
+        fill.style.backgroundColor = 'black';
+        percentText.style.color = 'black';
+    } else if (randomPercent >= 20 && randomPercent < 50) {
+        fill.style.backgroundColor = 'yellow';
+        percentText.style.color = '#888'; //
+    } else {
+        fill.style.backgroundColor = '#ff4d6d'; 
+        percentText.style.color = '#ff4d6d';
+    }
+}
+function toggleMusic() {
+    const audio = document.getElementById('myAudio');
+    const btn = document.getElementById('playButton');
+    const container = document.getElementById('player-container');
+
+    if (audio.paused) {
+        audio.play();
+        btn.innerHTML = '⏸'; // Значок паузы
+        container.classList.add('playing'); // Включаем пульсацию
+    } else {
+        audio.pause();
+        btn.innerHTML = '▶'; // Значок плея
+        container.classList.remove('playing'); // Выключаем пульсацию
+    }
+}
+function spreadHappiness(event) {
+    // 1. Случайные фразы
+    const messages = [
+        "Ты — моё самое большое счастье! ❤️",
+        "Твоя улыбка освещает мой мир! ☀️",
+        "Я обожаю тебя всё сильнее! 💕",
+        "Ты самая лучшая киска на свете! 🐾",
+        "Спасибо, что ты есть у меня! 💖",
+        "Лови миллион поцелуев! 💋"
+    ];
+    
+    const msgElement = document.getElementById('happiness-msg');
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    msgElement.innerText = randomMsg;
+
+    // 2. Эффект взрыва сердечек
+    for (let i = 0; i < 15; i++) {
+        createBurstHeart(event.clientX, event.clientY);
+    }
+}
+
+function createBurstHeart(x, y) {
+    const heart = document.createElement('div');
+    heart.innerHTML = '❤️';
+    heart.style.position = 'fixed';
+    heart.style.left = x + 'px';
+    heart.style.top = y + 'px';
+    heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+    heart.style.pointerEvents = 'none';
+    heart.style.zIndex = '2000';
+    
+    // Случайное направление разлета
+    const destinationX = (Math.random() - 0.5) * 300;
+    const destinationY = (Math.random() - 0.5) * 300;
+
+    const animation = heart.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${destinationX}px, ${destinationY}px) scale(0)`, opacity: 0 }
+    ], {
+        duration: 1000 + Math.random() * 1000,
+        easing: 'ease-out'
+    });
+
+    document.body.appendChild(heart);
+    animation.onfinish = () => heart.remove();
+}
+</script>
+</script>
+</body>
+</html>
